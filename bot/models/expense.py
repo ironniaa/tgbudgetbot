@@ -19,6 +19,8 @@ class Expense(Base):
     id = Column(Integer, primary_key=True)
 
     timestamp = Column(DateTime, default=datetime.utcnow)
+    
+    creator = Column(String)
 
     owner = Column(String)
 

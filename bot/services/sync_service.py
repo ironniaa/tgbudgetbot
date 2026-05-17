@@ -19,6 +19,7 @@ def sync_unsynced_expenses():
         operations_sheet.append_row([
             expense.id,
             str(expense.timestamp),
+            expense.creator,
             expense.owner,
             expense.category,
             expense.amount,

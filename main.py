@@ -19,6 +19,7 @@ from bot.handlers.category import category_handler
 
 from bot.handlers.text import text_handler
 
+from bot.handlers.history import history
 
 init_db()
 
@@ -56,6 +57,9 @@ app.add_handler(
     )
 )
 
+app.add_handler(
+    CommandHandler("history", history)
+)
 
 print("Bot started")
 
