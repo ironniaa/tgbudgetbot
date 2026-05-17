@@ -4,3 +4,4 @@ credentials/
 __pycache__/
 .vscode/
 *.db
+CLAUDE.MD
