@@ -34,6 +34,8 @@ async def text_handler(update, context):
 
         if comment == "-":
             comment = ""
+        
+        creator = update.effective_user.username
 
         owner = context.user_data.get("owner")
 
@@ -45,6 +47,7 @@ async def text_handler(update, context):
 
         expense = Expense(
             owner=owner,
+            creator=creator,
             category=category,
             amount=amount,
             comment=comment,
@@ -128,9 +131,12 @@ async def text_handler(update, context):
 
     owner = update.effective_user.username
 
+    creator = update.effective_user.username
+
     db = SessionLocal()
 
     expense = Expense(
+        creator=creator,
         owner=owner,
         category=category,
         amount=amount,
