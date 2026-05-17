@@ -1,7 +1,7 @@
 from bot.database.database import SessionLocal
 from bot.models.expense import Expense
 
-from bot.services.google_sheets import operations_sheet
+from bot.services.google_sheets import append_expenses
 
 
 def sync_unsynced_expenses():
@@ -14,18 +14,13 @@ def sync_unsynced_expenses():
         .all()
     )
 
+    if not unsynced:
+        db.close()
+        return
+
+    append_expenses(unsynced)
+
     for expense in unsynced:
-
-        operations_sheet.append_row([
-            expense.id,
-            str(expense.timestamp),
-            expense.creator,
-            expense.owner,
-            expense.category,
-            expense.amount,
-            expense.comment,
-        ])
-
         expense.synced = True
 
     db.commit()

@@ -18,3 +18,26 @@ client = gspread.authorize(creds)
 spreadsheet = client.open_by_key("10bc1iB9g0sc26x8mpNeEcGGy6naXMkfvBaWPTIbyhx0")
 
 operations_sheet = spreadsheet.worksheet("operations")
+
+
+def _expense_to_row(expense):
+    return [
+        expense.id,
+        str(expense.timestamp),
+        expense.creator,
+        expense.owner,
+        expense.category,
+        expense.amount,
+        expense.comment,
+    ]
+
+
+def append_expense(expense):
+    operations_sheet.append_row(_expense_to_row(expense))
+
+
+def append_expenses(expenses):
+    if not expenses:
+        return
+    rows = [_expense_to_row(e) for e in expenses]
+    operations_sheet.append_rows(rows)

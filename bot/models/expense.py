@@ -7,27 +7,29 @@ from sqlalchemy import (
     Boolean,
 )
 
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from datetime import datetime
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
 
 
 class Expense(Base):
     __tablename__ = "expenses"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     timestamp = Column(DateTime, default=datetime.utcnow)
-    
-    creator = Column(String)
 
-    owner = Column(String)
+    creator: Mapped[str] = mapped_column(String)
 
-    category = Column(String)
+    owner: Mapped[str] = mapped_column(String)
 
-    amount = Column(Float)
+    category: Mapped[str] = mapped_column(String)
 
-    comment = Column(String)
+    amount: Mapped[float] = mapped_column(Float)
 
-    synced = Column(Boolean, default=False)
+    comment: Mapped[str] = mapped_column(String)
+
+    synced: Mapped[bool] = mapped_column(Boolean, default=False)
