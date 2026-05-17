@@ -21,6 +21,8 @@ from bot.handlers.text import text_handler
 
 from bot.handlers.history import history
 
+from bot.handlers.undo import undo
+
 init_db()
 
 app = ApplicationBuilder().token(TOKEN).build()
@@ -59,6 +61,10 @@ app.add_handler(
 
 app.add_handler(
     CommandHandler("history", history)
+)
+
+app.add_handler(
+    CommandHandler("undo", undo)
 )
 
 print("Bot started")
