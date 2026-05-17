@@ -22,7 +22,9 @@ class Expense(Base):
 
     timestamp = Column(DateTime, default=datetime.utcnow)
 
-    owner = Column(String)
+    creator: Mapped[str] = mapped_column(String)
+
+    owner: Mapped[str] = mapped_column(String)
 
     category: Mapped[str] = mapped_column(String)
 
