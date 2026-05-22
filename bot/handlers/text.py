@@ -1,3 +1,6 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from bot.utils.access import check_access
 
 from bot.utils.keyboards import main_keyboard
@@ -9,6 +12,8 @@ from bot.utils.parser import normalize_category
 from bot.database.database import SessionLocal
 
 from bot.models.expense import Expense
+
+from bot.config import TIMEZONE
 
 from bot.services.sync_service import (
     sync_unsynced_expenses,
@@ -51,6 +56,8 @@ async def text_handler(update, context):
             category=category,
             amount=amount,
             comment=comment,
+            created_at=datetime.now(ZoneInfo(TIMEZONE)),
+            timezone=TIMEZONE,
         )
 
         db.add(expense)
@@ -141,6 +148,8 @@ async def text_handler(update, context):
         category=category,
         amount=amount,
         comment=comment,
+        created_at=datetime.now(ZoneInfo(TIMEZONE)),
+        timezone=TIMEZONE,
     )
 
     db.add(expense)

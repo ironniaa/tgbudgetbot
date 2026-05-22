@@ -13,3 +13,5 @@ FID = int(os.getenv("FIRST_ID"))
 SID = int(os.getenv("SECOND_ID"))
 
 ALLOWED_USER_IDS = [FID, SID]
+
+TIMEZONE = "Europe/Minsk"

@@ -31,10 +31,13 @@ operations_sheet = spreadsheet.worksheet("operations")
 
 
 def _expense_to_row(expense):
+    created_at_str = ""
+    if expense.created_at:
+        created_at_str = expense.created_at.strftime("%d.%m.%Y %H:%M")
 
     return [
         expense.id,
-        str(expense.timestamp),
+        created_at_str,
         expense.creator,
         expense.owner,
         expense.category,
@@ -77,7 +80,7 @@ def rewrite_sheet():
 
     operations_sheet.append_row([
         "id",
-        "timestamp",
+        "created_at",
         "creator",
         "owner",
         "category",
