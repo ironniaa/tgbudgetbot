@@ -4,6 +4,9 @@ from bot.utils.keyboards import (
     categories_keyboard,
 )
 
+from bot.utils.inline_keyboards import (
+    categories_inline,
+)
 
 async def mode_handler(update, context):
 
@@ -29,5 +32,5 @@ async def mode_handler(update, context):
 
     await update.message.reply_text(
         "Выбери категорию:",
-        reply_markup=categories_keyboard(),
+        reply_markup=categories_inline(),
     )
