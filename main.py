@@ -15,13 +15,15 @@ from bot.handlers.reset import reset
 
 from bot.handlers.mode import mode_handler
 
-from bot.handlers.category import category_handler
-
 from bot.handlers.text import text_handler
 
 from bot.handlers.history import history
 
 from bot.handlers.undo import undo
+
+from bot.handlers.callbacks import callbacks
+
+from telegram.ext import CallbackQueryHandler
 
 init_db()
 
@@ -44,12 +46,7 @@ app.add_handler(
 )
 
 app.add_handler(
-    MessageHandler(
-        filters.Regex(
-            "^(🍔 Еда|🚕 Транспорт|🏠 Квартира|🧴 Хоз|🎮 Развлечения)$"
-        ),
-        category_handler,
-    )
+    CallbackQueryHandler(callbacks)
 )
 
 app.add_handler(
