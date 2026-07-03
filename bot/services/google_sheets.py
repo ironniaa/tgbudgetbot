@@ -1,3 +1,5 @@
+import logging
+
 import gspread
 
 from google.oauth2.service_account import Credentials
@@ -8,6 +10,8 @@ from bot.database.database import SessionLocal
 
 from bot.models.expense import Expense
 
+
+logger = logging.getLogger(__name__)
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -28,6 +32,12 @@ def _get_spreadsheet():
         creds = Credentials.from_service_account_file(
             "credentials/google.json",
             scopes=SCOPES,
+        )
+
+        logger.info(
+            "Google Sheets: аутентификация как %s, открываю таблицу GOOGLE_SHEET_ID=%r",
+            creds.service_account_email,
+            GOOGLE_SHEET_ID,
         )
 
         client = gspread.authorize(creds)
