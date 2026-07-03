@@ -6,14 +6,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-TOKEN = os.getenv("BOT_TOKEN")
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
 
-FID = int(os.getenv("FIRST_ID"))
+    if not value:
+        raise RuntimeError(f"Переменная окружения {name} не задана")
 
-SID = int(os.getenv("SECOND_ID"))
+    return value
+
+
+TOKEN = _require_env("BOT_TOKEN")
+
+FID = int(_require_env("FIRST_ID"))
+
+SID = int(_require_env("SECOND_ID"))
 
 ALLOWED_USER_IDS = [FID, SID]
 
-GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
+GOOGLE_SHEET_ID = _require_env("GOOGLE_SHEET_ID")
 
 TIMEZONE = "Europe/Minsk"

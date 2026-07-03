@@ -1,4 +1,6 @@
+import json
 import logging
+import os
 
 import gspread
 
@@ -18,10 +20,25 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
+CREDENTIALS_FILE = "credentials/google.json"
+
 
 _spreadsheet = None
 
 _operations_sheet = None
+
+
+def _load_credentials():
+    raw_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+
+    if raw_json:
+        info = json.loads(raw_json)
+        return Credentials.from_service_account_info(info, scopes=SCOPES)
+
+    return Credentials.from_service_account_file(
+        CREDENTIALS_FILE,
+        scopes=SCOPES,
+    )
 
 
 def _get_spreadsheet():
@@ -29,10 +46,7 @@ def _get_spreadsheet():
 
     if _spreadsheet is None:
 
-        creds = Credentials.from_service_account_file(
-            "credentials/google.json",
-            scopes=SCOPES,
-        )
+        creds = _load_credentials()
 
         logger.info(
             "Google Sheets: аутентификация как %s, открываю таблицу GOOGLE_SHEET_ID=%r",
