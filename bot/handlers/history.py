@@ -12,16 +12,22 @@ async def history(update, context):
 
     username = update.effective_user.username
 
+    filter_arg = context.args[0].lower() if context.args else None
+
     db = SessionLocal()
 
-    expenses = (
-        db.query(Expense)
-        .order_by(Expense.created_at.desc())
-        .limit(10)
-        .all()
-    )
+    try:
+        query = db.query(Expense).order_by(Expense.created_at.desc())
 
-    db.close()
+        if filter_arg == "личное":
+            query = query.filter(Expense.owner == username)
+        elif filter_arg == "общее":
+            query = query.filter(Expense.owner == "общее")
+
+        expenses = query.limit(10).all()
+
+    finally:
+        db.close()
 
     if not expenses:
 

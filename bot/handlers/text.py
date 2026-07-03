@@ -20,6 +20,12 @@ from bot.services.sync_service import (
 )
 
 
+def _sync_warning_suffix(synced_ok):
+    if synced_ok:
+        return ""
+    return "\n⚠️ Не синхронизировано с таблицей, попробуем позже"
+
+
 async def text_handler(update, context):
 
     if not await check_access(update):
@@ -39,7 +45,7 @@ async def text_handler(update, context):
 
         if comment == "-":
             comment = ""
-        
+
         creator = update.effective_user.username
 
         owner = context.user_data.get("owner")
@@ -50,28 +56,30 @@ async def text_handler(update, context):
 
         db = SessionLocal()
 
-        expense = Expense(
-            owner=owner,
-            creator=creator,
-            category=category,
-            amount=amount,
-            comment=comment,
-            created_at=datetime.now(ZoneInfo(TIMEZONE)),
-            timezone=TIMEZONE,
-        )
+        try:
+            expense = Expense(
+                owner=owner,
+                creator=creator,
+                category=category,
+                amount=amount,
+                comment=comment,
+                created_at=datetime.now(ZoneInfo(TIMEZONE)),
+                timezone=TIMEZONE,
+            )
 
-        db.add(expense)
+            db.add(expense)
 
-        db.commit()
+            db.commit()
 
-        db.close()
+        finally:
+            db.close()
 
-        sync_unsynced_expenses()
+        synced_ok = sync_unsynced_expenses()
 
         context.user_data.clear()
 
         await update.message.reply_text(
-            f"✅ {category}: {amount}",
+            f"✅ {category}: {amount}{_sync_warning_suffix(synced_ok)}",
             reply_markup=main_keyboard(),
         )
 
@@ -85,7 +93,7 @@ async def text_handler(update, context):
 
         try:
             amount = float(text)
-        except:
+        except ValueError:
             await update.message.reply_text(
                 "Введите сумму числом"
             )
@@ -117,7 +125,10 @@ async def text_handler(update, context):
 
     try:
         amount = float(parts[1])
-    except:
+    except ValueError:
+        await update.message.reply_text(
+            "Не понял сумму. Формат: <категория> <сумма> [комментарий]"
+        )
         return
 
     extra_comment = (
@@ -142,25 +153,27 @@ async def text_handler(update, context):
 
     db = SessionLocal()
 
-    expense = Expense(
-        creator=creator,
-        owner=owner,
-        category=category,
-        amount=amount,
-        comment=comment,
-        created_at=datetime.now(ZoneInfo(TIMEZONE)),
-        timezone=TIMEZONE,
-    )
+    try:
+        expense = Expense(
+            creator=creator,
+            owner=owner,
+            category=category,
+            amount=amount,
+            comment=comment,
+            created_at=datetime.now(ZoneInfo(TIMEZONE)),
+            timezone=TIMEZONE,
+        )
 
-    db.add(expense)
+        db.add(expense)
 
-    db.commit()
+        db.commit()
 
-    db.close()
+    finally:
+        db.close()
 
-    sync_unsynced_expenses()
+    synced_ok = sync_unsynced_expenses()
 
     await update.message.reply_text(
-        f"✅ {category}: {amount}",
+        f"✅ {category}: {amount}{_sync_warning_suffix(synced_ok)}",
         reply_markup=main_keyboard(),
     )

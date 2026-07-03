@@ -4,4 +4,6 @@ credentials/
 __pycache__/
 .vscode/
 *.db
+*.log
 CLAUDE.MD
+.codemie/

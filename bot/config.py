@@ -14,4 +14,6 @@ SID = int(os.getenv("SECOND_ID"))
 
 ALLOWED_USER_IDS = [FID, SID]
 
+GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
+
 TIMEZONE = "Europe/Minsk"
