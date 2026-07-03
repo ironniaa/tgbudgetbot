@@ -5,9 +5,7 @@ from bot.utils.access import check_access
 
 from bot.utils.keyboards import main_keyboard
 
-from bot.utils.categories import CATEGORIES
-
-from bot.utils.parser import normalize_category
+from bot.utils.parser import resolve_transaction
 
 from bot.database.database import SessionLocal
 
@@ -121,7 +119,7 @@ async def text_handler(update, context):
 
     raw_category = parts[0]
 
-    category = normalize_category(raw_category)
+    kind, category = resolve_transaction(raw_category)
 
     try:
         amount = float(parts[1])
@@ -157,6 +155,7 @@ async def text_handler(update, context):
         expense = Expense(
             creator=creator,
             owner=owner,
+            type=kind,
             category=category,
             amount=amount,
             comment=comment,
@@ -173,7 +172,12 @@ async def text_handler(update, context):
 
     synced_ok = sync_unsynced_expenses()
 
+    if kind == "income":
+        confirmation = f"💰 Доход ({category}): +{amount}"
+    else:
+        confirmation = f"✅ {category}: {amount}"
+
     await update.message.reply_text(
-        f"✅ {category}: {amount}{_sync_warning_suffix(synced_ok)}",
+        f"{confirmation}{_sync_warning_suffix(synced_ok)}",
         reply_markup=main_keyboard(),
     )

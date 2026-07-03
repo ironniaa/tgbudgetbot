@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import Integer, String, Float, DateTime, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from datetime import datetime
@@ -25,11 +27,13 @@ class Expense(Base):
 
     timezone: Mapped[str] = mapped_column(String, default=TIMEZONE)
 
+    type: Mapped[str] = mapped_column(String, default="expense")
+
     creator: Mapped[str] = mapped_column(String)
 
     owner: Mapped[str] = mapped_column(String)
 
-    category: Mapped[str] = mapped_column(String)
+    category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     amount: Mapped[float] = mapped_column(Float)
 

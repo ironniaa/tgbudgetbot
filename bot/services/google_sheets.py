@@ -50,6 +50,7 @@ def _expense_to_row(expense):
         expense.category,
         expense.amount,
         expense.comment,
+        expense.type,
     ]
 
 
@@ -98,6 +99,7 @@ def rewrite_sheet():
         "category",
         "amount",
         "comment",
+        "type",
     ])
 
     rows = [
