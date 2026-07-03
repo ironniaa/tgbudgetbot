@@ -15,13 +15,15 @@ SCOPES = [
 ]
 
 
+_spreadsheet = None
+
 _operations_sheet = None
 
 
-def _get_operations_sheet():
-    global _operations_sheet
+def _get_spreadsheet():
+    global _spreadsheet
 
-    if _operations_sheet is None:
+    if _spreadsheet is None:
 
         creds = Credentials.from_service_account_file(
             "credentials/google.json",
@@ -30,11 +32,22 @@ def _get_operations_sheet():
 
         client = gspread.authorize(creds)
 
-        spreadsheet = client.open_by_key(GOOGLE_SHEET_ID)
+        _spreadsheet = client.open_by_key(GOOGLE_SHEET_ID)
 
-        _operations_sheet = spreadsheet.worksheet("operations")
+    return _spreadsheet
+
+
+def _get_operations_sheet():
+    global _operations_sheet
+
+    if _operations_sheet is None:
+        _operations_sheet = _get_spreadsheet().worksheet("operations")
 
     return _operations_sheet
+
+
+def get_worksheet_values(sheet_name):
+    return _get_spreadsheet().worksheet(sheet_name).get_all_values()
 
 
 def _expense_to_row(expense):
