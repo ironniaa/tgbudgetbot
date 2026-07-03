@@ -5,5 +5,6 @@ __pycache__/
 .vscode/
 *.db
 *.log
+backups/
 CLAUDE.MD
 .codemie/

@@ -3,6 +3,10 @@ from bot.utils.categories import CATEGORIES
 from bot.utils.income_sources import INCOME_SOURCES
 
 
+def parse_amount(text: str) -> float:
+    return float(text.replace(",", "."))
+
+
 def resolve_transaction(word: str):
 
     word = word.lower()

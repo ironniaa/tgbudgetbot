@@ -5,7 +5,7 @@ from bot.utils.access import check_access
 
 from bot.utils.keyboards import main_keyboard
 
-from bot.utils.parser import resolve_transaction
+from bot.utils.parser import resolve_transaction, parse_amount
 
 from bot.database.database import SessionLocal
 
@@ -90,7 +90,7 @@ async def text_handler(update, context):
     if step == "amount":
 
         try:
-            amount = float(text)
+            amount = parse_amount(text)
         except ValueError:
             await update.message.reply_text(
                 "Введите сумму числом"
@@ -122,7 +122,7 @@ async def text_handler(update, context):
     kind, category = resolve_transaction(raw_category)
 
     try:
-        amount = float(parts[1])
+        amount = parse_amount(parts[1])
     except ValueError:
         await update.message.reply_text(
             "Не понял сумму. Формат: <категория> <сумма> [комментарий]"

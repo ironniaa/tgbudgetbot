@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -29,6 +30,8 @@ from bot.handlers.stats import stats
 
 from bot.handlers.callbacks import callbacks
 
+from bot.services.backup_service import run_backup
+
 from telegram.ext import CallbackQueryHandler
 
 init_db()
@@ -49,7 +52,24 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-app = ApplicationBuilder().token(TOKEN).build()
+BACKUP_INTERVAL_SECONDS = 24 * 60 * 60
+
+
+async def _periodic_backup_loop():
+    while True:
+        try:
+            await asyncio.to_thread(run_backup)
+        except Exception:
+            logger.exception("Плановый бэкап не удался")
+
+        await asyncio.sleep(BACKUP_INTERVAL_SECONDS)
+
+
+async def _post_init(application):
+    asyncio.create_task(_periodic_backup_loop())
+
+
+app = ApplicationBuilder().token(TOKEN).post_init(_post_init).build()
 
 
 app.add_handler(
