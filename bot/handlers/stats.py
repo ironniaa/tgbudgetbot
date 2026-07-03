@@ -11,6 +11,32 @@ from bot.models.expense import Expense
 from bot.config import TIMEZONE
 
 
+def _breakdown_lines(entries, owner_title, category_title):
+
+    lines = []
+
+    by_owner = defaultdict(float)
+
+    by_category = defaultdict(float)
+
+    for entry in entries:
+        by_owner[entry.owner] += entry.amount
+        by_category[entry.category] += entry.amount
+
+    lines.append(owner_title)
+
+    for owner, amount in sorted(by_owner.items(), key=lambda item: -item[1]):
+        lines.append(f"  {owner}: {amount:.2f}")
+
+    lines.append("")
+    lines.append(category_title)
+
+    for category, amount in sorted(by_category.items(), key=lambda item: -item[1]):
+        lines.append(f"  {category}: {amount:.2f}")
+
+    return lines
+
+
 async def stats(update, context):
 
     if not await check_access(update):
@@ -25,7 +51,7 @@ async def stats(update, context):
     db = SessionLocal()
 
     try:
-        expenses = (
+        entries = (
             db.query(Expense)
             .filter(Expense.created_at >= month_start)
             .all()
@@ -33,39 +59,42 @@ async def stats(update, context):
     finally:
         db.close()
 
-    if not expenses:
+    if not entries:
 
         await update.message.reply_text(
-            "В этом месяце пока нет трат."
+            "В этом месяце пока нет операций."
         )
 
         return
 
-    total = sum(expense.amount for expense in expenses)
+    expenses = [e for e in entries if e.type == "expense"]
 
-    by_owner = defaultdict(float)
+    incomes = [e for e in entries if e.type == "income"]
 
-    by_category = defaultdict(float)
+    total_expense = sum(e.amount for e in expenses)
 
-    for expense in expenses:
-        by_owner[expense.owner] += expense.amount
-        by_category[expense.category] += expense.amount
+    total_income = sum(e.amount for e in incomes)
+
+    balance = total_income - total_expense
 
     lines = [
         f"📊 Статистика за {month_start.strftime('%m.%Y')}",
         "",
-        f"Всего: {total:.2f}",
-        "",
-        "По владельцам:",
+        f"💰 Доходы: {total_income:.2f}",
+        f"💸 Расходы: {total_expense:.2f}",
+        f"📈 Остаток: {balance:.2f}",
     ]
 
-    for owner, amount in sorted(by_owner.items(), key=lambda item: -item[1]):
-        lines.append(f"  {owner}: {amount:.2f}")
+    if expenses:
+        lines.append("")
+        lines.extend(
+            _breakdown_lines(expenses, "Расходы по владельцам:", "Расходы по категориям:")
+        )
 
-    lines.append("")
-    lines.append("По категориям:")
-
-    for category, amount in sorted(by_category.items(), key=lambda item: -item[1]):
-        lines.append(f"  {category}: {amount:.2f}")
+    if incomes:
+        lines.append("")
+        lines.extend(
+            _breakdown_lines(incomes, "Доходы по владельцам:", "Доходы по источникам:")
+        )
 
     await update.message.reply_text("\n".join(lines))

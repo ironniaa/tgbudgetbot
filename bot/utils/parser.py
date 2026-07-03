@@ -1,13 +1,20 @@
 from bot.utils.categories import CATEGORIES
 
+from bot.utils.income_sources import INCOME_SOURCES
 
-def normalize_category(word: str):
+
+def resolve_transaction(word: str):
 
     word = word.lower()
 
     for category, aliases in CATEGORIES.items():
 
         if word in aliases:
-            return category
+            return "expense", category
 
-    return word
+    for source, aliases in INCOME_SOURCES.items():
+
+        if word in aliases:
+            return "income", source
+
+    return "expense", word

@@ -44,10 +44,16 @@ async def history(update, context):
         if expense.created_at:
             date_str = expense.created_at.strftime("%d.%m.%Y %H:%M")
 
+        is_income = expense.type == "income"
+
+        icon = "💰" if is_income else "💸"
+
+        sign = "+" if is_income else "-"
+
         message += (
-            f"• [{expense.owner}] "
+            f"• {icon} [{expense.owner}] "
             f"{expense.category} — "
-            f"{expense.amount}\n"
+            f"{sign}{expense.amount}\n"
             f"{date_str} | внес: {expense.creator}\n\n"
         )
 
