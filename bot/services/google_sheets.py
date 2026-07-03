@@ -2,6 +2,8 @@ import gspread
 
 from google.oauth2.service_account import Credentials
 
+from bot.config import GOOGLE_SHEET_ID
+
 from bot.database.database import SessionLocal
 
 from bot.models.expense import Expense
@@ -13,21 +15,26 @@ SCOPES = [
 ]
 
 
-creds = Credentials.from_service_account_file(
-    "credentials/google.json",
-    scopes=SCOPES,
-)
+_operations_sheet = None
 
 
-client = gspread.authorize(creds)
+def _get_operations_sheet():
+    global _operations_sheet
 
+    if _operations_sheet is None:
 
-spreadsheet = client.open_by_key(
-    "10bc1iB9g0sc26x8mpNeEcGGy6naXMkfvBaWPTIbyhx0"
-)
+        creds = Credentials.from_service_account_file(
+            "credentials/google.json",
+            scopes=SCOPES,
+        )
 
+        client = gspread.authorize(creds)
 
-operations_sheet = spreadsheet.worksheet("operations")
+        spreadsheet = client.open_by_key(GOOGLE_SHEET_ID)
+
+        _operations_sheet = spreadsheet.worksheet("operations")
+
+    return _operations_sheet
 
 
 def _expense_to_row(expense):
@@ -48,7 +55,7 @@ def _expense_to_row(expense):
 
 def append_expense(expense):
 
-    operations_sheet.append_row(
+    _get_operations_sheet().append_row(
         _expense_to_row(expense)
     )
 
@@ -63,22 +70,27 @@ def append_expenses(expenses):
         for e in expenses
     ]
 
-    operations_sheet.append_rows(rows)
+    _get_operations_sheet().append_rows(rows)
 
 
 def rewrite_sheet():
 
     db = SessionLocal()
 
-    expenses = (
-        db.query(Expense)
-        .order_by(Expense.id.asc())
-        .all()
-    )
+    try:
+        expenses = (
+            db.query(Expense)
+            .order_by(Expense.id.asc())
+            .all()
+        )
+    finally:
+        db.close()
 
-    operations_sheet.clear()
+    sheet = _get_operations_sheet()
 
-    operations_sheet.append_row([
+    sheet.clear()
+
+    sheet.append_row([
         "id",
         "created_at",
         "creator",
@@ -94,6 +106,4 @@ def rewrite_sheet():
     ]
 
     if rows:
-        operations_sheet.append_rows(rows)
-
-    db.close()
+        sheet.append_rows(rows)

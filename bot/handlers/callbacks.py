@@ -1,9 +1,14 @@
+from bot.utils.access import check_access
+
 from bot.utils.inline_keyboards import (
     categories_inline,
 )
 
 
 async def callbacks(update, context):
+
+    if not await check_access(update):
+        return
 
     query = update.callback_query
 

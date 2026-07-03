@@ -1,3 +1,7 @@
+import logging
+from logging.handlers import RotatingFileHandler
+
+from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -21,11 +25,29 @@ from bot.handlers.history import history
 
 from bot.handlers.undo import undo
 
+from bot.handlers.stats import stats
+
 from bot.handlers.callbacks import callbacks
 
 from telegram.ext import CallbackQueryHandler
 
 init_db()
+
+# Alembic (внутри init_db) переконфигурирует root-логгер через fileConfig(),
+# поэтому наши handlers ставятся только после миграций и с force=True.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        RotatingFileHandler(
+            "bot.log", maxBytes=1_000_000, backupCount=3, encoding="utf-8"
+        ),
+    ],
+    force=True,
+)
+
+logger = logging.getLogger(__name__)
 
 app = ApplicationBuilder().token(TOKEN).build()
 
@@ -64,6 +86,35 @@ app.add_handler(
     CommandHandler("undo", undo)
 )
 
-print("Bot started")
+app.add_handler(
+    CommandHandler("stats", stats)
+)
+
+
+async def error_handler(update, context):
+
+    logger.error(
+        "Необработанная ошибка при обработке обновления",
+        exc_info=context.error,
+    )
+
+    message = (
+        update.effective_message
+        if isinstance(update, Update)
+        else None
+    )
+
+    if message is not None:
+        try:
+            await message.reply_text(
+                "Что-то пошло не так, попробуйте позже."
+            )
+        except Exception:
+            logger.exception("Не удалось уведомить пользователя об ошибке")
+
+
+app.add_error_handler(error_handler)
+
+logger.info("Bot started")
 
 app.run_polling()
